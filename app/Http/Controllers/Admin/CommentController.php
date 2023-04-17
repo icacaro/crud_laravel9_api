@@ -5,90 +5,67 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    protected $comment;
-    protected $user;
 
-    public function __construct(Comment $comment, User $user)
+
+    public function index() :JsonResponse
     {
-        $this->comment = $comment;
-        $this->user = $user;
+        $comentarios = Comment::all();
+        return response()->json([
+            'comentarios' => $comentarios,
+        ], 200);
     }
-
-    public function index($userId)
+    
+    public function show (Comment $comment) :JsonResponse
     {
-        if(!$user = $this->user->find($userId)){
-            return redirect()->back();
-        }
-
-        $comments = $user->comments()->get();
-
-        return view('users.comments.index', compact('user', 'comments'));
+        return response()->json($comment, 200);
+        
     }
 
     public function create($userId)
     {
-        if(!$user = $this->user->find($userId)){
-            return redirect()->back();
-        }
-
-
-        return view('users.comments.create', compact('user'));
+          
+        
     }
 
-    public function store(Request $request, $userId)
+    public function store(Request $request, $userId) :JsonResponse
     {
-        if(!$user = $this->user->find($userId)){
-            return redirect()->back();
-        }
-
-        $user->comments()->create([
+        $user = User::find($userId);
+        $comment = new Comment([
             'body' => $request->body,
             'visible' => isset($request->visible)
         ]);
-
-
-        return redirect()->route('comments.index', $user->id);
+        $user->comments()->save($comment);
+        return response()->json($user, 200);
+        
     }
 
     public function edit($userId, $id)
     {
-        if(!$comment = $this->comment->find($id)){
-            return redirect()->back();
-        }
-
-        $user = $comment->user;
-
-
-        return view('users.comments.edit', compact('user', 'comment'));
+        
+        
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Comment $comment) :JsonResponse
     {
-        if(!$comment = $this->comment->find($id)){
-            return redirect()->back();
-        }
-
-        $comment->update([
+        $data = [
             'body' => $request->body,
-            'visible' => isset($request->visible)
-        ]);
-
-
-        return redirect()->route('comments.index', $comment->user_id);
+            'visible' =>isset($request->visible)
+        ];
+        
+        $comment->update($data);
+        return response()->json($comment, 200);
+        
     }
 
-    public function delete($id)
+    public function delete(Comment $comment) :JsonResponse
     {
-        if (!$comment = $this->comment->find($id))
-            return redirect()->back();
-
         $comment->delete();
-
-        return redirect()->route('comments.index', $comment->user_id);
+        return response()->json('registro deletado', 200);
     }
 
 

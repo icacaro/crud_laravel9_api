@@ -41,18 +41,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-    public function getUsers(string $search = '')
-    {
-        $users = $this->where(function ($query) use ($search) {
-            if ($search){
-                $query->where('email', '=', $search);
-                $query->orWhere('name', 'LIKE', "%{$search}%");
-            }
-
-        })->get();
-
-        return $users;
-    }
 
     public function comments()
     {
@@ -60,11 +48,9 @@ class User extends Authenticatable
     }
 
 
-
-    public function storeUser(Array $parametros)
+    public function usuarioperfil()
     {
-        $user = User::create($parametros);
-        return redirect()->route('users.index');
+        return $this->belongsTo(UsuarioPerfil::class);
     }
 
 }
